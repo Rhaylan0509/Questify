@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Prova PDF</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; text-align: center; padding: 2rem; background-color: #f8f9fa; color: #343a40;}
+        .container { max-width: 700px; margin: auto; }
+        button { background-color: #0d6efd; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; margin-top: 20px; transition: background-color 0.2s; }
+        button:hover { background-color: #0b5ed7; }
+        button:disabled { background-color: #6c757d; cursor: wait; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerador de Prova Definitivo</h1>
+        <p>Gere provas em PDF com equações matemáticas perfeitas usando a tecnologia Node.js + Puppeteer.</p>
+        <button id="btn-gerar-teste">Gerar PDF da Prova</button>
+    </div>
+
+    <script>
+        document.getElementById('btn-gerar-teste').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-gerar-teste');
+            btn.innerText = 'Gerando...';
+            btn.disabled = true;
+
+            const DADOS_DE_TESTE = [
+                { texto: 'Qual é a solução da equação de segundo grau $x^2 - 5x + 6 = 0$?', alternativas: ['A) $x=1, x=6$', 'B) $x=2, x=3$', 'C) $x=-2, x=-3$'] },
+                { texto: 'Calcule o valor da integral definida: $$\\int_{0}^{2} (x^3) \\,dx$$', alternativas: ['A) 2', 'B) 8', 'C) 16'] },
+                { texto: 'Se o raio de uma esfera é $r=3$ cm, qual é o seu volume? (Use a fórmula $V = \\frac{4}{3}\\pi r^3$)', alternativas: ['A) $12\\pi \\, \\text{cm}^3$', 'B) $18\\pi \\, \\text{cm}^3$', 'C) $36\\pi \\, \\text{cm}^3$'] },
+                { texto: 'Encontre a derivada da função $f(x) = \\sin(2x) + x^4$.', alternativas: ["A) $f'(x) = \\cos(2x) + 4x^3$", "B) $f'(x) = -\\cos(2x) + 4x^3$", "C) $f'(x) = 2\\cos(2x) + 4x^3$"] },
+                { texto: 'Qual é o valor de $x$ na equação exponencial $2^{x+1} = 32$?', alternativas: ['A) $x=2$', 'B) $x=3$', 'C) $x=4$'] },
+                { texto: 'A soma dos ângulos internos de um hexágono regular é:', alternativas: ['A) 540°', 'B) 720°', 'C) 900°'] },
+                { texto: 'Dado o limite $$\\lim_{x \\to \\infty} \\frac{2x^2 - 3x + 1}{x^2 + 5}$$, qual é o seu valor?', alternativas: ['A) 0', 'B) 1', 'C) 2'] },
+                { texto: 'Qual dos seguintes números é um número irracional?', alternativas: ['A) $\\sqrt{16}$', 'B) $\\frac{22}{7}$', 'C) $\\sqrt{2}$'] },
+                { texto: 'Determine a matriz resultante da soma $A+B$, onde $A = \\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}$ e $B = \\begin{pmatrix} 5 & 6 \\\\ 7 & 8 \\end{pmatrix}$.', alternativas: ['A) $\\begin{pmatrix} 5 & 12 \\\\ 21 & 32 \\end{pmatrix}$', 'B) $\\begin{pmatrix} 6 & 8 \\\\ 10 & 12 \\end{pmatrix}$', 'C) $\\begin{pmatrix} -4 & -4 \\\\ -4 & -4 \\end{pmatrix}$'] },
+                { texto: 'Se $\\cos(\\theta) = \\frac{3}{5}$ e $\\theta$ está no primeiro quadrante, qual o valor de $\\sin(\\theta)$?', alternativas: ['A) $\\frac{2}{5}$', 'B) $\\frac{3}{4}$', 'C) $\\frac{4}{5}$'] }
+            ];
+
+            try {
+                const response = await fetch('/generate-pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        questoes: DADOS_DE_TESTE,
+                        tituloProva: 'Prova de Matemática (Gerada via Servidor)'
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                    throw new Error(`Erro do servidor: ${errorData.message}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'prova_final.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Erro ao gerar o PDF:', error);
+                alert('Falha ao gerar o PDF. Verifique o log do servidor.');
+            } finally {
+                btn.innerText = 'Gerar PDF da Prova';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
